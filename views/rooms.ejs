@@ -6,11 +6,27 @@
 </head>
 <body>
     <main>
+      <div class="profile">
         <% if (user) { %>
-            Hello, <%= user.username %>.
-          <% } else { %>
-            aaaaaaaa
-          <% } %>
+          <script>
+              let thisUser = `<%= user.username %>`;            
+          </script>
+          <p>Hello, <%= user.username %> !</p>
+        <% } %>
+        <a href="/logout">Logout</a>
+      </div>
     </main>
+
+
+    <script>
+      socket.emit("login", thisUser);
+      socket.on("shareData", (username, callback) => {
+        callback({name:thisUser});
+        console.log(`sent callback to ${username}`);
+      });
+      socket.on("usersUpdate", (data) => {
+        console.log(`got data: ${data[0].name}`);
+      });
+  </script>
 </body>
 </html>

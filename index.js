@@ -16,6 +16,8 @@ import usersRouter from "./src/routes/users.js";
 import roomsRouter from "./src/routes/rooms.js";
 
 export const app = express();
+const server = http.createServer(app);
+const io = new Server(server);
 
 const port = 3000;
 
@@ -26,34 +28,28 @@ app.use(express.json());
 app.use(express.static("public"));
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
-
-app.get("/", (req, res) => {
-  res.render("index", {
-    name: "indexx",
-  });
-});
-
-const server = http.createServer(app);
-const io = new Server(server);
-
-app.use(loadUser);
-app.use(usersRouter(io));
-app.use(roomsRouter(io));
 app.use((req, res, next) => {
+  req.io = io;
   next();
 });
 
-// 404
-// app.use("*", (req, res) => {
-//   return res.status(404).json({
-//     success: false,
-//     message: "404 :c",
-//   });
-// });
+app.use(loadUser);
+app.use(usersRouter);
+app.use(roomsRouter);
 
 setSockets(io);
 
+app.get("/", loadUser, (req, res) => {
+  const user = res.locals.user;
+
+  if (user) {
+    res.redirect("/rooms");
+  } else {
+    res.render("index");
+  }
+});
+
 server.listen(port);
 server.on("listening", () => {
-  console.log(`Listening ${port}`);
+  // console.log(`Listening ${port}`);
 });
