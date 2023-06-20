@@ -1,0 +1,34 @@
+{
+  "name": "4it573",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "index.js",
+  "dependencies": {
+    "cookie-parser": "^1.4.6",
+    "dotenv": "^16.3.1",
+    "ejs": "^3.1.9",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.0",
+    "knex": "^2.4.2",
+    "mysql": "^2.18.1",
+    "socket.io": "^4.6.2"
+  },
+  "scripts": {
+    "dev": "nodemon index.js",
+    "prod": "node main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/t-chess/4it573.git"
+  },
+  "author": "Tatiana Chess",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/t-chess/4it573/issues"
+  },
+  "homepage": "https://github.com/t-chess/4it573#readme",
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  }
+}

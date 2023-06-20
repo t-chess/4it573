@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('_metadata') %>
+    <title>The Rooms</title>
+</head>
+<body>
+    <main>
+        <h1>Welcome to the Rooms!</h1>
+        <p>Log in or register <a href="/register">here</a>.</p>
+
+        <form action="/login" method="POST">
+            <label>
+                <span>Username</span>
+                <input name="username" type="text" placeholder="Username">
+            </label>
+            <label>
+                <span>Password</span>
+                <input name="password" type="password" placeholder="Password">
+            </label>
+            <button type="submit">Login</button>
+        </form>
+    </main>
+</body>
+</html>
