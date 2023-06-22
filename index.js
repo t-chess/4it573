@@ -15,13 +15,13 @@ import loadUser from "./src/middleware/loadUser.js";
 import usersRouter from "./src/routes/users.js";
 import roomsRouter from "./src/routes/rooms.js";
 
+dotenv.config();
+
 export const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-const port = process.env.PORT || 80;
-
-dotenv.config();
+const port = process.env.PORT || 3000;
 
 app.set("view engine", "ejs");
 app.use(express.json());

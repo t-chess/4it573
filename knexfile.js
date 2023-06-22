@@ -1,10 +1,18 @@
+import dotenv from "dotenv";
+dotenv.config();
 export default {
-  client: "mysql",
-  connection: {
-    port: process.env.DB_PORT || 3306,
-    host: process.env.DB_HOST || "localhost",
-    database: process.env.DB_NAME || "rooms",
-    user: process.env.DB_USER || "user",
-    password: process.env.DB_PASSWORD || "",
+  development: {
+    client: "mysql",
+    connection: {
+      port: process.env.DB_PORT,
+      host: process.env.DB_HOST,
+      database: process.env.DB_NAME,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD || "",
+    },
+  },
+  production: {
+    client: "mysql",
+    connection: process.env.JAWSDB_URL,
   },
 };
