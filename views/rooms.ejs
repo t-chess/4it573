@@ -17,10 +17,12 @@
       </div>
       <div class="map" style="display: inline-block;">
         <div class="map__box">
-          <div class="map__box__room" id="lobby" style="width:800px;height:400px;background-color: lightseagreen;position:relative;">
-            <div id="thisUser" style="width:20px;height:20px;background-color:red;position:absolute;left:400px;top:200px;"></div>
+          <div class="map__box__room" id="lobby" style="width:800px;height:400px;">
+            <div class="userDiv me" id="thisUser" style="left:400px;top:200px;">
+              <span><%= user.username %> (YOU)</span>
+            </div>
           </div>
-          <div class="map__box__room" id="room2" style="width:800px;height:400px;background-color: lightpink;text-align:right;"></div>
+          <div class="map__box__room closed" id="room2" style="width:800px;height:400px;"></div>
         </div>
       </div>
       <div class="chat" style="width:400px;display: inline-block;background-color: lightgreen;max-height: 800px;">
@@ -34,26 +36,31 @@
 
 
     <script>
-      let coordinates = {x: 500, y: 200};
+      let myCoordinates = {x: 400, y: 200};
       let usersInRoom = [];
-      let room = 'lobby';
+      let thisRoom = 'lobby';
 
       // sockets
-      socket.emit("login", thisUser);
+      setTimeout(() => {
+        socket.emit("login", thisUser);
+      }, 500);
       socket.on("shareDataLogin", (data) => {
-        usersInRoom.push({username:data.user, coordinates: {x: 400, y: 200}});
+        // console.log('users in room before anyone joined (must be empty):', usersInRoom)
+        // console.log("user (not you!) just logged in, id and username:", data.id,data.user);
+        updateUsers({id: data.id, username:data.user});
         let welcome = document.createElement("p");
         welcome.innerHTML = `${data.user} joined lobby`;
         document.getElementById('chatbox').appendChild(welcome)
-        socket.emit("loginResponse", {socket: data.socket, data:{username:thisUser, coordinates}});
-        console.log(`${data.user} logged in, you sent callback`);
+        socket.emit("loginResponse", {socket: data.id, data:{username:thisUser, coordinates:myCoordinates}});
+        // console.log(`${data.user} logged in, you sent callback`);
       });
       socket.on("receiveLoginResponse", (data)=> {
-        console.log('receiveLoginResponse', data)
+        // console.log('i just logged in and received data from other user:(username,id,coordinates)', data);
+        updateUsers(data);
       })
       socket.on('newMessage', data => {
         let msg = document.createElement("p");
-        msg.innerHTML = `${data.user}: ${data.message}`;
+        msg.innerHTML = `${data.username}: ${data.message}`;
         document.getElementById('chatbox').appendChild(msg)
       })
 
@@ -61,11 +68,83 @@
       const sendMessage= (e)=>{
         e.preventDefault();
         let msg = document.getElementById('messageinput').value;
-        socket.emit('messageSent', {user: thisUser, room: room, message: msg});
+        socket.emit('messageSent', {username: thisUser, room: thisRoom, message: msg});
         document.getElementById('messageinput').value = '';
       }
-
       document.getElementById('messageform').addEventListener("submit", sendMessage);
+      const newUserElement = (data) => {
+        let div = document.createElement('div');
+        div.classList.add('userDiv');
+        div.id = 'user-'+data.username;
+        div.innerHTML = "<span>"+data.username+"</span>";
+        div.style.left = data.coordinates? data.coordinates.x+'px' : '400px';
+        div.style.top = data.coordinates? data.coordinates.y+'px' :'200px';
+        return div
+      }
+      const updateUsers = (data) => {
+        let targetUser = usersInRoom.find(u=>u.username==data.username); 
+        // console.log('empty if just logged in (for both users), not empty if updating on move:', targetUser);
+        if (targetUser) {
+          targetUser.coordinates = data.coordinates;
+          let userElement = document.getElementById('user-'+data.username);
+          // console.log('this showing and not empty only if moving!:', userElement)
+          userElement.style.left = data.coordinates.x+'px';
+          userElement.style.top = data.coordinates.y+"px";
+        } else {
+          // console.log('update user: usersInroom before inserting new user / if just logged in then before receiving other users info, this log cant show if receiving other users moving', usersInRoom);
+          usersInRoom.push(data);
+          // console.log('update user: usersInroom after inserting new user / receiving other users', usersInRoom);
+          document.getElementById(thisRoom).appendChild(newUserElement(data));
+        }   
+      }
+
+
+      const moveHandler = (e) => {
+        // console.log(e.keyCode);
+        if (e.keyCode == '38') {
+          // up arrow
+          myCoordinates.y -= 10;
+        }
+        else if (e.keyCode == '40') {
+          // down arrow
+          myCoordinates.y += 10;
+        }
+        else if (e.keyCode == '37') {
+          // left arrow
+          myCoordinates.x -= 10;
+        }
+        else if (e.keyCode == '39') {
+          // right arrow
+          myCoordinates.x += 10;
+        } else {
+          return
+        }
+        document.getElementById('thisUser').style.left = myCoordinates.x+'px';
+        document.getElementById('thisUser').style.top = myCoordinates.y+'px';
+        socket.emit('shareUpdate', {room: thisRoom, data:{username:thisUser, coordinates:myCoordinates}} )
+      }
+      document.onkeydown = moveHandler;
+
+      socket.on('receiveUpdate', data => {
+        updateUsers(data);
+      })
+
+      socket.on('userLeft', ({id}) =>{
+        // console.log('user left with id', id);
+        let left = usersInRoom.findIndex(u => u.id == id);
+        if (left > -1) {
+          // console.log('target dom element to remove:',document.getElementById('user-'+usersInRoom[left].username));
+          let leftDom = document.getElementById('user-'+usersInRoom[left].username);
+          leftDom.remove();
+          let goodbye = document.createElement("p");
+          goodbye.innerHTML = `${usersInRoom[left].username} left lobby`;
+          document.getElementById('chatbox').appendChild(goodbye);
+          usersInRoom.splice(left, 1);
+        }
+        // console.log('userLeft array after removing',usersInRoom)
+      })
+
+      
   </script>
 </body>
 </html>
