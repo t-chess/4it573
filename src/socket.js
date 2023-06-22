@@ -1,18 +1,20 @@
 export default (io) => {
   io.on("connection", (socket) => {
     socket.on("disconnect", () => {
-      socket.leave("users");
+      socket.leave("lobby");
     });
 
-    socket.on("login", (username) => {
-      socket.join("users");
+    socket.on("login", (user) => {
+      socket.join("lobby");
       socket
-        .to("users")
-        .timeout(5000)
-        .emit("shareData", username, (err, response) => {
-          console.log("response", response);
-          io.to(socket.id).emit("usersUpdate", response);
-        });
+        .to("lobby")
+        .emit("shareDataLogin", { socket: socket.id, user: user });
+    });
+    socket.on("loginResponse", (data) => {
+      io.to(data.socket).emit("receiveLoginResponse", data.data);
+    });
+    socket.on("messageSent", (data) => {
+      io.to(data.room).emit("newMessage", data);
     });
   });
 };

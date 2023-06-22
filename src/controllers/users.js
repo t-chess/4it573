@@ -33,4 +33,9 @@ export default {
 
     return user;
   },
+  getUserByUsername: async (username) => {
+    const user = await db("users").where({ username }).first();
+
+    return user;
+  },
 };

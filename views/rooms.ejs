@@ -15,18 +15,57 @@
         <% } %>
         <a href="/logout">Logout</a>
       </div>
+      <div class="map" style="display: inline-block;">
+        <div class="map__box">
+          <div class="map__box__room" id="lobby" style="width:800px;height:400px;background-color: lightseagreen;position:relative;">
+            <div id="thisUser" style="width:20px;height:20px;background-color:red;position:absolute;left:400px;top:200px;"></div>
+          </div>
+          <div class="map__box__room" id="room2" style="width:800px;height:400px;background-color: lightpink;text-align:right;"></div>
+        </div>
+      </div>
+      <div class="chat" style="width:400px;display: inline-block;background-color: lightgreen;max-height: 800px;">
+        <div class="chat__box" id="chatbox"></div>
+        <form id="messageform">
+          <input id="messageinput" type="text" name="message" placeholder="message">
+          <button type="submit">&rarr;</button>
+        </form>
+      </div>
     </main>
 
 
     <script>
+      let coordinates = {x: 500, y: 200};
+      let usersInRoom = [];
+      let room = 'lobby';
+
+      // sockets
       socket.emit("login", thisUser);
-      socket.on("shareData", (username, callback) => {
-        callback({name:thisUser});
-        console.log(`sent callback to ${username}`);
+      socket.on("shareDataLogin", (data) => {
+        usersInRoom.push({username:data.user, coordinates: {x: 400, y: 200}});
+        let welcome = document.createElement("p");
+        welcome.innerHTML = `${data.user} joined lobby`;
+        document.getElementById('chatbox').appendChild(welcome)
+        socket.emit("loginResponse", {socket: data.socket, data:{username:thisUser, coordinates}});
+        console.log(`${data.user} logged in, you sent callback`);
       });
-      socket.on("usersUpdate", (data) => {
-        console.log(`got data: ${data[0].name}`);
-      });
+      socket.on("receiveLoginResponse", (data)=> {
+        console.log('receiveLoginResponse', data)
+      })
+      socket.on('newMessage', data => {
+        let msg = document.createElement("p");
+        msg.innerHTML = `${data.user}: ${data.message}`;
+        document.getElementById('chatbox').appendChild(msg)
+      })
+
+
+      const sendMessage= (e)=>{
+        e.preventDefault();
+        let msg = document.getElementById('messageinput').value;
+        socket.emit('messageSent', {user: thisUser, room: room, message: msg});
+        document.getElementById('messageinput').value = '';
+      }
+
+      document.getElementById('messageform').addEventListener("submit", sendMessage);
   </script>
 </body>
 </html>
