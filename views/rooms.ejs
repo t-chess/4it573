@@ -40,6 +40,9 @@
       // sockets
       setTimeout(() => {
         socket.emit("login", thisUser);
+        let welcome = document.createElement("p");
+        welcome.innerHTML = `Welcome to lobby!`;
+        document.getElementById('chatbox').appendChild(welcome)
       }, 500);
       socket.on("shareDataLogin", (data) => {
         // console.log('users in room before anyone joined (must be empty):', usersInRoom)
