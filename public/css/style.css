@@ -2,9 +2,11 @@
     transition: all 0.25s ease-in-out;width:20px;height:20px;
     position:absolute;
     background-color: blue;
+    z-index: 10;
 }
 .userDiv.me {
     background-color:red!important;
+    z-index: 15;
 }
 .userDiv span {
     position: absolute;

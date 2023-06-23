@@ -1,3 +1,9 @@
+import { db } from "../database.js";
+
 export default {
-  sendMessage: async (req, res) => {},
+  getRoomById: async (id) => {
+    const room = await db("rooms").where({ id }).first();
+    if (!room) return null;
+    return room;
+  },
 };

@@ -7,18 +7,13 @@
 <body>
     <main>
       <div class="profile">
-        <% if (user) { %>
-          <script>
-              let thisUser = `<%= user.username %>`;            
-          </script>
           <p>Hello, <%= user.username %> !</p>
-        <% } %>
         <a href="/logout">Logout</a>
       </div>
       <div class="map" style="display: inline-block;">
         <div class="map__box">
-          <div class="map__box__room" id="lobby" style="width:800px;height:400px;">
-            <div class="userDiv me" id="thisUser" style="left:400px;top:200px;">
+          <div class="map__box__room" id="lobby" style="width:<%= room.width %>px;height:<%= room.height %>px;">
+            <div class="userDiv me" id="thisUser" style="left:<%= room.width/2 %>px;top:<%= room.height/2 %>px;">
               <span><%= user.username %> (YOU)</span>
             </div>
           </div>
@@ -34,11 +29,13 @@
       </div>
     </main>
 
-
     <script>
-      let myCoordinates = {x: 400, y: 200};
+      let thisUser = `<%= user.username %>`;   
+      let thisRoom = `<%= room.name %>`;
+      let roomsSize = {width:<%= room.width %>, height:<%= room.height %>};
+      let myCoordinates = {x: <%= room.width/2 %>, y: <%= room.height/2 %>};
       let usersInRoom = [];
-      let thisRoom = 'lobby';
+
 
       // sockets
       setTimeout(() => {
@@ -103,19 +100,27 @@
         // console.log(e.keyCode);
         if (e.keyCode == '38') {
           // up arrow
-          myCoordinates.y -= 10;
+          if (myCoordinates.y>=0) {
+            myCoordinates.y -= 10;
+          } 
         }
         else if (e.keyCode == '40') {
-          // down arrow
-          myCoordinates.y += 10;
+          if (myCoordinates.y<=roomsSize.height-10) {
+            // down arrow
+            myCoordinates.y += 10;
+          } 
         }
         else if (e.keyCode == '37') {
-          // left arrow
-          myCoordinates.x -= 10;
+          if (myCoordinates.x>=0) {
+            // left arrow
+            myCoordinates.x -= 10;
+          } 
         }
         else if (e.keyCode == '39') {
-          // right arrow
-          myCoordinates.x += 10;
+          if (myCoordinates.x<=roomsSize.width-10) {
+            // right arrow
+            myCoordinates.x += 10;
+          }
         } else {
           return
         }
